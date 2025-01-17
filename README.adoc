@@ -1,16 +1,19 @@
-= CloudBees action: Dispatch Workflows
+= CloudBees action: Dispatch multiple workflows
 
-Use this action to dispatch multiple workflows in CloudBees Platform.
+Use this action to dispatch multiple workflows in the CloudBees Platform.
 
 == Prerequisites
-- This action requires a Personal Access Token (PAT) to dispatch workflows. You must generate a PAT in the CloudBees Platform before invoking the Dispatch Workflows action. 
-For more information, refer to the link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/personal-access-token#generate[Personal Access Tokens documentation].
-- All workflows to be dispatched must be manual workflows.
+* You must link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/personal-access-token#generate[generate a Personal Access Token (PAT) in the CloudBees Platform] before invoking this action.
+* All workflows to be dispatched must be link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/manage-workflows#create-trigger[manually triggered] workflows.
 
 == Inputs
 
+=== YAML file specifications
+
+The following inputs are for the YAML file:
+
 [cols="2a,1a,1a,3a",options="header"]
-.Input details
+.YAML file specifications
 |===
 
 | Input name
@@ -21,48 +24,35 @@ For more information, refer to the link:https://docs.cloudbees.com/docs/cloudbee
 | `workflows-dispatch-file`
 | String
 | Yes
-| Path to the JSON file containing workflow dispatch requests.
+| Path to the <<#json,JSON file>> containing workflow dispatch requests.
 
 | `token`
 | String
 | Yes
-| Authorization token to authenticate workflow dispatch requests. It is recommended to pass the token as a secret reference to ensure security.
+| Authorization token to authenticate workflow dispatch requests.
+CloudBees recommends that you pass the token as a link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/configure/properties[secret] reference to ensure security.
 
 | `execution-mode`
 | String
 | No
-| Execution mode for dispatching workflows. Whether to dispatch all the workflows in parallel or dispatch sequentially. Supported values: `parallel`, `serial`. Default is `parallel`.
+| Whether to dispatch all the workflows in parallel or sequentially. Supported values: 'parallel' (default) or 'serial'.
 
 | `wait-for-completion`
-| String
+| Boolean
 | No
-| Whether to wait for completion of workflows. Default is `false`. Set to `true` when `execution-mode=serial`.
+| Whether to wait for workflow executions to complete.
+Defaults to false when `execution-mode: parallel` is set.
+When `execution-mode: serial` is set, is only considered to be true.
 
 |===
 
-== Example Dispatch Request JSON File
-[source,json]
-----
-[
-  {
-    "component_id": "b3214b60-fc7d-4839-b84d-4a4e69bb9a36",
-    "branch_name": "branch-1",
-    "workflow_file_name": "workflow-1.yaml",
-    "inputs": {
-      "testkey1": "value",
-      "testkey2": "50"
-    }
-  },
-  {
-    "component_id": "1bf5c9bf-3a88-41c1-a568-138c8b2a7e38",
-    "branch_name": "branch-2",
-    "workflow_file_name": "workflow-2.yaml",
-  }
-]
-----
+[#json]
+=== JSON file specifications
+
+The following inputs are for the JSON file:
 
 [cols="2a,1a,1a,3a",options="header"]
-.Specification for Dispatch Request JSON
+.JSON file specifications
 |===
 
 | Field
@@ -73,7 +63,7 @@ For more information, refer to the link:https://docs.cloudbees.com/docs/cloudbee
 | `component_id`
 | String
 | Yes
-| The ID of the component containing the workflow (with a manual trigger) to run. Locate the component_id in your browser address bar, displayed as <COMPONENT_ID> in the URL: `https://cloudbees.io/orgs/<YOUR_ORGANIZATION>/components/runs?componentId=<COMPONENT_ID>&organizationId=<ORGANIZATION_ID>`
+| The <<#component-id,ID of the component containing the manually triggered workflow>>.
 
 | `branch_name`
 | String
@@ -88,28 +78,80 @@ For more information, refer to the link:https://docs.cloudbees.com/docs/cloudbee
 | `inputs`
 | Object
 | No
-| Input parameters to be passed to dispatch the workflow. Represented as map(key-value pairs), where keys and values are strings.
+| Input parameters to be passed to dispatch the workflow.
+Represented as key-value pairs, where keys and values are both strings.
 
 | `ignore_failures`
-| String
+| Boolean
 | No
-| Specifies whether to ignore failures during workflow execution.
+| Whether to ignore workflow trigger or execution failures.
+Default is false.
+When both `execution-mode: parallel` and `wait-for-completion: false` are set, is only considered to be true.
 
 |===
 
-Note:
+[#component-id]
+[TIP]
+====
+Locate the component ID in your browser address bar, displayed as `<COMPONENT_ID>` in the example below:
 
-- For `execution-mode=serial`: If `ignore_failures=true`, the action continues triggering subsequent workflows even if an error occurs. If false, the action stops and fails at the first failure.
+[source, bash]
+----
+https://cloudbees.io/orgs/<YOUR_ORGANIZATION>/components/runs?componentId=<COMPONENT_ID>&organizationId=<ORGANIZATION_ID>
+----
+====
 
-- For `execution-mode=parallel` with `wait-for-completion=true`: If `ignore_failures=false`, the action fails after completing the execution of all workflows.
+== Usage examples
 
-== Usage example
-In your YAML file, to dispatch workflows, add:
+The following summarizes the expected results of using different YAML and JSON specifications in this action.
 
-To dispatch workflows with defaults
+[cols="1a,1a,4a",options="header"]
+.Input examples and results in response to workflow executions.
+|===
+
+2+| When the following inputs are specified:
+| The following results are observed:
+
+| `execution-mode:`
+| `wait-for-completion:`
+|
+
+| `parallel`
+| `false`
+| The action triggers all workflows in parallel.
+Once triggered, the action step passes regardless of any failures.
+The `ignore-failures` parameter is always considered false for this scenario.
+
+| `parallel`
+| `true`
+| The action triggers all workflows in parallel, and waits for all triggered runs to complete.
+If all runs are successful, the action step passes.
+If a dispatched workflow fails in being triggered or executed and has:
+
+* `ignore-failures: true` specified, it does not affect the action step result.
+* `ignore-failures: false` specified, the action step fails.
+
+| `serial`
+| `true` ^<<footnote1,[1]>>^
+| The action triggers each workflow sequentially, so as soon as a workflow run is complete the next workflow is triggered to execute.
+If all runs are successful, the action step passes.
+If a dispatched workflow fails in being triggered or executed and has:
+
+* `ignore-failures: true` specified, the action step result is not affected by this run, and the action continues on to trigger the next workflow in the series.
+* `ignore-failures: false` specified, the action step fails on first failure and subsequent workflows are not triggered.
+
+|===
+
+[#footnote1]
+^[1]^ The `wait-for-completion` parameter is always considered true when `execution-mode: serial` is set.
+
+=== Usage example: Default settings
+
+The following example uses the default settings (execution mode: parallel, wait for completion: false).
+
 [source,yaml]
 ----
-    - name: Dispatch Workflows
+    - name: Dispatch workflows
       uses: cloudbees-io/workflows-dispatch@v1
       with:
         workflows-dispatch-file: dispatch_requests.json
@@ -117,10 +159,31 @@ To dispatch workflows with defaults
 
 ----
 
-To dispatch workflows with wait-for-completion
+The dispatch_requests.json file for the YAML file above:
+
+[source,json,role="default-expanded"]
+----
+[
+  {
+    "component_id": "12345678-9abc-defg-h123-456789abcdef",
+    "branch_name": "branch-1",
+    "workflow_file_name": "workflow-1.yaml"
+  },
+  {
+    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
+    "branch_name": "branch-2",
+    "workflow_file_name": "workflow-2.yaml"
+  }
+]
+----
+
+=== Usage example: Await completion of workflow execution
+
+The following action example executes workflows in parallel and waits for completion of all:
+
 [source,yaml]
 ----
-    - name: Dispatch Workflows
+    - name: Dispatch workflows and wait for completion
       uses: cloudbees-io/workflows-dispatch@v1
       with:
         workflows-dispatch-file: dispatch_requests.json
@@ -130,14 +193,50 @@ To dispatch workflows with wait-for-completion
 
 ----
 
-To dispatch workflows in serial mode and ignore failures
+The dispatch_requests.json file for the example above:
 
-Sample dispatch_requests.json
-[source,json]
+[source,json,role="default-expanded"]
 ----
 [
   {
-    "component_id": "b3214b60-fc7d-4839-b84d-4a4e69bb9a36",
+    "component_id": "12345678-9abc-defg-h123-456789abcdef",
+    "branch_name": "branch-1",
+    "workflow_file_name": "workflow-1.yaml",
+    "inputs": {
+      "testkey1": "value",
+      "testkey2": "50"
+    }
+  },
+  {
+    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
+    "branch_name": "branch-2",
+    "workflow_file_name": "workflow-2.yaml"
+  }
+]
+----
+
+=== Usage example: Ignore workflow execution failures
+
+The following action example executes workflows sequentially and ignores failures for one but not the other workflow:
+
+[source,yaml]
+----
+    - name: Dispatch workflows sequentially and ignore failures
+      uses: cloudbees-io/workflows-dispatch@v1
+      with:
+        workflows-dispatch-file: dispatch_requests.json
+        token: "${{ secrets.TOKEN }}"
+        execution-mode: "serial"
+
+----
+
+The dispatch_requests.json file for the action example above:
+
+[source,json,role="default-expanded"]
+----
+[
+  {
+    "component_id": "12345678-9abc-defg-h123-456789abcdef",
     "branch_name": "branch-1",
     "workflow_file_name": "workflow-1.yaml",
     "inputs": {
@@ -147,24 +246,16 @@ Sample dispatch_requests.json
     "ignore_failures": true
   },
   {
-    "component_id": "1bf5c9bf-3a88-41c1-a568-138c8b2a7e38",
+    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
     "branch_name": "branch-2",
     "workflow_file_name": "workflow-2.yaml",
-    "ignore_failures": true
+    "ignore_failures": false
   }
 ]
 ----
 
-Usage in YAML:
-[source,yaml]
-----
-    - name: Dispatch Workflows
-      uses: cloudbees-io/workflows-dispatch@v1
-      with:
-        workflows-dispatch-file: dispatch_requests.json
-        token: "${{ secrets.TOKEN }}"
-        execution-mode: "serial"
-----
+In the example above, *workflow-2* is executed regardless if *workflow-1* execution has failed, and if *workflow-2* is completed successfully, the action step is passed.
+If *workflow-2* fails, the action step is failed.
 
 == License
 
