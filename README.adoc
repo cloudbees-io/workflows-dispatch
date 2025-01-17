@@ -254,5 +254,15 @@ The dispatch_requests.json file for the action example above:
 ]
 ----
 
+== License
+
+This code is made available under the 
+link:https://opensource.org/license/mit/[MIT license].
+
+== References
+
+* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/actions[using actions in CloudBees workflows].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/[the CloudBees platform].
+
 In the example above, *workflow-2* is executed regardless if *workflow-1* execution has failed, and if *workflow-2* is completed successfully, the action step is passed.
 If *workflow-2* fails, the action step is failed.
