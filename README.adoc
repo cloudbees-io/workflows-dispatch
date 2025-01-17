@@ -1,9 +1,9 @@
 = CloudBees action: Dispatch multiple workflows
 
-Use this action to dispatch multiple workflows in the CloudBees Platform.
+Use this action to dispatch multiple workflows in the CloudBees platform.
 
 == Prerequisites
-* You must link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/personal-access-token#generate[generate a Personal Access Token (PAT) in the CloudBees Platform] before invoking this action.
+* You must link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/personal-access-token#generate[generate a Personal Access Token (PAT) in the CloudBees platform] before invoking this action.
 * All workflows to be dispatched must be link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/manage-workflows#create-trigger[manually triggered] workflows.
 
 == Inputs
