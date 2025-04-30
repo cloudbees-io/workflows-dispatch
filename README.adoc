@@ -60,20 +60,20 @@ The following inputs are for the JSON file:
 | Required
 | Description
 
-| `component_id`
-| String
-| Yes
-| The <<#component-id,ID of the component containing the manually triggered workflow>>.
-
-| `branch_name`
-| String
-| Yes
-| The branch name containing the workflow to dispatch.
-
 | `workflow_file_name`
 | String
 | Yes
 | The name of the workflow file to dispatch.
+
+| `branch_name`
+| String
+| No
+| The branch name containing the workflow to dispatch.
+
+| `component_id`
+| String
+| No
+| The link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/organizations-components/components#component-id[ID of the component] containing the manually triggered workflow (located in the platform URL after `componentId=`).
 
 | `inputs`
 | Object
@@ -89,17 +89,6 @@ Default is false.
 When both `execution-mode: parallel` and `wait-for-completion: false` are set, is only considered to be true.
 
 |===
-
-[#component-id]
-[TIP]
-====
-Locate the component ID in your browser address bar, displayed as `<COMPONENT_ID>` in the example below:
-
-[source, bash]
-----
-https://cloudbees.io/orgs/<YOUR_ORGANIZATION>/components/runs?componentId=<COMPONENT_ID>&organizationId=<ORGANIZATION_ID>
-----
-====
 
 == Usage examples
 
@@ -165,13 +154,9 @@ The dispatch_requests.json file for the YAML file above:
 ----
 [
   {
-    "component_id": "12345678-9abc-defg-h123-456789abcdef",
-    "branch_name": "branch-1",
     "workflow_file_name": "workflow-1.yaml"
   },
   {
-    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
-    "branch_name": "branch-2",
     "workflow_file_name": "workflow-2.yaml"
   }
 ]
@@ -199,8 +184,6 @@ The dispatch_requests.json file for the example above:
 ----
 [
   {
-    "component_id": "12345678-9abc-defg-h123-456789abcdef",
-    "branch_name": "branch-1",
     "workflow_file_name": "workflow-1.yaml",
     "inputs": {
       "testkey1": "value",
