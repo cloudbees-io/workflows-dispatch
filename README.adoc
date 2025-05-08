@@ -68,12 +68,12 @@ The following inputs are for the JSON file:
 | `branch_name`
 | String
 | No
-| The branch name containing the workflow to dispatch.
+| The branch name containing the workflow to dispatch. The default is the same branch as the caller workflow.
 
 | `component_id`
 | String
 | No
-| The link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/organizations-components/components#component-id[ID of the component] containing the manually triggered workflow (located in the platform URL after `componentId=`).
+| The link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/organizations-components/components#component-id[ID of the component] containing the manually triggered workflow (located in the platform URL after `componentId=`). The default is the component ID of where the caller workflow is located.
 
 | `inputs`
 | Object
