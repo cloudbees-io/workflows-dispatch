@@ -191,7 +191,7 @@ The dispatch_requests.json file for the example above:
     }
   },
   {
-    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
+    "component_id": "abcdef90-1234-5678-9abc-def121234567",
     "branch_name": "branch-2",
     "workflow_file_name": "workflow-2.yaml"
   }
@@ -219,7 +219,7 @@ The dispatch_requests.json file for the action example above:
 ----
 [
   {
-    "component_id": "12345678-9abc-defg-h123-456789abcdef",
+    "component_id": "12345678-9abc-def1-0123-456789abcdef",
     "branch_name": "branch-1",
     "workflow_file_name": "workflow-1.yaml",
     "inputs": {
@@ -229,7 +229,7 @@ The dispatch_requests.json file for the action example above:
     "ignore_failures": true
   },
   {
-    "component_id": "abcdefgh-1234-5678-9abc-defgh1234567",
+    "component_id": "abcdefab-1234-5678-9abc-def001234567",
     "branch_name": "branch-2",
     "workflow_file_name": "workflow-2.yaml",
     "ignore_failures": false
