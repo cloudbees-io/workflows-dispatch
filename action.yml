@@ -21,7 +21,7 @@ runs:
   steps:
     - id: run-workflow-dispatch-action
       name: "Dispatch Workflows"
-      uses: docker://public.ecr.aws/l7o7z1g8/actions/workflow-dispatch-actions:main-a9ec59f36d3b44525979097940e50ecd67e53122
+      uses: docker://public.ecr.aws/l7o7z1g8/actions/workflow-dispatch-actions:main-b1ce9fdb0257cfafa94de27b49f6d89b6761fe9c
       shell: sh
       env:
         RUN_ID: ${{ cloudbees.run_id }}
